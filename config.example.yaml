@@ -1,0 +1,65 @@
+# Vigie — configuration example. Copy to config/config.yaml (Docker) or /etc/vigie/config.yaml (LXC).
+# Every section is optional. Addresses and secrets of the integrations go in .env (see .env.example).
+
+title: Vigie                          # name shown in the top bar and the browser tab
+base_url: https://vigie.example.com   # used in the "new device" e-mail
+
+# Vigie is meant to sit behind a reverse proxy that authenticates users (Authentik, Authelia, oauth2-proxy…)
+# and forwards their groups in a header. Editing devices and starting a speed test are reserved to admin_group.
+# Leave admin_group empty to allow everyone (only do this if the proxy already restricts access).
+sso:
+  name: Authentik                     # shown in the Security tab ("Authentik sign-ins")
+  groups_header: X-Authentik-Groups
+  groups_separator: "|"
+  admin_group: admins
+
+# Your networks. "name" must match the interface description in OPNsense (or anything you like without OPNsense).
+# Devices are placed in a network by IP; "wifi: true" counts its devices as Wi-Fi clients.
+# Without any network, every private address seen is listed.
+networks:
+  # - {name: LAN, label: LAN, cidr: 192.168.1.0/24, vlan: 1, color: "#60a5fa"}
+  # - {name: IOT, label: IoT, cidr: 192.168.20.0/24, vlan: 20, color: "#fbbf24"}
+  # - {name: GUEST, label: Guests, cidr: 192.168.30.0/24, vlan: 30, color: "#f472b6", wifi: true}
+
+# Ping sweep (default: every network above). Without OPNsense, only the networks Vigie is directly
+# attached to reveal MAC addresses (local ARP table).
+# scan: [192.168.1.0/24]
+local_network: LAN                    # network name for devices only seen in the local ARP table
+
+latency_targets:
+  - {name: Cloudflare, ip: 1.1.1.1}
+  - {name: Google, ip: 8.8.8.8}
+  - {name: Quad9, ip: 9.9.9.9}
+modem: {name: Box, ip: "", label: ""} # your ISP router: ping target and label drawn on it
+isp: ""                               # e.g. "Fibre 1 Gb/s"
+speedtest: {enabled: true, every_hours: 6}   # 4 streams to speed.cloudflare.com; 0 = on demand only
+
+# Cisco IOS switch (CISCO_HOST in .env): trunk ports are ignored when locating devices.
+switch: {trunk_ports: [], wifi_port: ""}
+wifi: {name: Wi-Fi access point, router_mode: false}   # router_mode: clients hidden behind the AP
+
+opnsense: {interfaces: [lan]}         # internal interfaces used to share traffic per device (lan, opt1…)
+uptime_kuma: {status_page: default}   # slug of a public status page (KUMA_URL in .env)
+
+# Machines on the Services page: matched by name with Beszel systems, Proxmox nodes and Uptime Kuma monitors.
+# Empty = Proxmox nodes then Beszel systems.
+hosts:
+  # - {name: node1}
+  # - {name: nas, nas: true}
+
+# Applications on the Services page, grouped. "monitor" = name of the Uptime Kuma monitor that gives its status.
+# Icons: plex, jellyfin, photos, seerr, musique, casque, livre, qbit, seed, sonarr, radarr, lidarr, prowlarr, bazarr,
+# opnsense, adguard, zoraxy, cloudflare, vpn, auth, vault, proxmox, pbs, beszel, portainer, kuma, git, wiki, ha,
+# documents, mail, nas, web, apps, cloche, partage, dessin, telechargement…
+groups: [Media, Network, Infrastructure]
+apps:
+  - {icon: jellyfin, name: Jellyfin, url: "https://jellyfin.example.com", group: Media, monitor: Jellyfin}
+  - {icon: adguard, name: AdGuard Home, url: "https://dns.example.com", group: Network, monitor: AdGuard Home}
+  - {icon: proxmox, name: Proxmox, url: "https://pve.example.com:8006", group: Infrastructure, monitor: Proxmox}
+
+# qBittorrent (optional, read-only, no password: add Vigie's IP to the Web UI auth bypass whitelist).
+# One client, or two: main client first, then the seeding client fed by cross-seed. Enables the Cross-seed page.
+qbittorrent: []
+  # - {name: Main, url: "http://192.168.1.20:8080"}
+  # - {name: Seed, url: "http://192.168.1.20:8081"}
+trackers: {}                          # part of a tracker URL → display name, e.g. {example: Example}

@@ -1,0 +1,16 @@
+services:
+  vigie:
+    build: .
+    image: vigie:latest
+    container_name: vigie
+    restart: unless-stopped
+    # Host network: the ping sweep and the local ARP table must see your real LAN.
+    network_mode: host
+    cap_add: [NET_RAW]
+    env_file: .env
+    volumes:
+      - ./config:/config:ro
+      - vigie-data:/data
+
+volumes:
+  vigie-data:

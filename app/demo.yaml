@@ -1,0 +1,55 @@
+# Configuration du mode démo (DEMO=1) : un homelab entièrement fictif, pour essayer Vigie et faire les captures d'écran.
+title: Vigie
+base_url: https://vigie.example.com
+sso: {name: Authentik, groups_header: X-Authentik-Groups, admin_group: ""}
+networks:
+  - {name: LAN, label: LAN, cidr: 192.168.10.0/24, vlan: 10, color: "#60a5fa"}
+  - {name: IOT, label: Objets connectés, cidr: 192.168.20.0/24, vlan: 20, color: "#fbbf24"}
+  - {name: GUEST, label: Invités, cidr: 192.168.30.0/24, vlan: 30, color: "#f472b6", wifi: true}
+  - {name: SERVERS, label: Serveurs, cidr: 192.168.40.0/24, vlan: 40, color: "#34d399"}
+  - {name: WIFI, label: Wi-Fi, cidr: 192.168.50.0/24, vlan: 50, color: "#2dd4bf", wifi: true}
+local_network: SERVERS
+modem: {name: Box, ip: 192.168.0.1, label: FIBRE}
+isp: Fibre 2 Gb/s
+switch: {trunk_ports: [Gi1/0/1, Gi1/0/2, Gi1/0/3, Gi1/0/48], wifi_port: Gi1/0/12}
+wifi: {name: Point d'accès Wi-Fi 6, router_mode: false}
+uptime_kuma: {status_page: maison}
+hosts:
+  - {name: nova}
+  - {name: orion}
+  - {name: vega}
+  - {name: nas, nas: true}
+groups: [Médias, Téléchargements, Réseau et sécurité, Infrastructure, Maison]
+apps:
+  - {icon: plex, name: Plex, url: "https://app.plex.tv", group: Médias, monitor: Plex}
+  - {icon: jellyfin, name: Jellyfin, url: "https://jellyfin.example.com", group: Médias, monitor: Jellyfin}
+  - {icon: photos, name: Immich, url: "https://photos.example.com", group: Médias, monitor: Immich}
+  - {icon: seerr, name: Jellyseerr, url: "https://requests.example.com", group: Médias, monitor: Jellyseerr}
+  - {icon: musique, name: Navidrome, url: "https://music.example.com", group: Médias, monitor: Navidrome}
+  - {icon: casque, name: Audiobookshelf, url: "https://books.example.com", group: Médias, monitor: Audiobookshelf}
+  - {icon: qbit, name: qBittorrent, url: "https://qbit.example.com", group: Téléchargements}
+  - {icon: seed, name: qBittorrent seed, url: "https://seed.example.com", group: Téléchargements}
+  - {icon: sonarr, name: Sonarr, url: "https://sonarr.example.com", group: Téléchargements, monitor: Sonarr}
+  - {icon: radarr, name: Radarr, url: "https://radarr.example.com", group: Téléchargements, monitor: Radarr}
+  - {icon: lidarr, name: Lidarr, url: "https://lidarr.example.com", group: Téléchargements, monitor: Lidarr}
+  - {icon: prowlarr, name: Prowlarr, url: "https://prowlarr.example.com", group: Téléchargements, monitor: Prowlarr}
+  - {icon: opnsense, name: OPNsense, url: "https://opnsense.example.com", group: Réseau et sécurité, monitor: OPNsense}
+  - {icon: adguard, name: AdGuard Home, url: "https://dns.example.com", group: Réseau et sécurité, monitor: AdGuard Home}
+  - {icon: zoraxy, name: Zoraxy, url: "https://proxy.example.com", group: Réseau et sécurité, monitor: Zoraxy}
+  - {icon: auth, name: Authentik, url: "https://auth.example.com", group: Réseau et sécurité, monitor: Authentik}
+  - {icon: vault, name: Vaultwarden, url: "https://vault.example.com", group: Réseau et sécurité, monitor: Vaultwarden}
+  - {icon: vpn, name: WireGuard, url: "https://vpn.example.com", group: Réseau et sécurité, monitor: WireGuard}
+  - {icon: proxmox, name: Proxmox, url: "https://pve.example.com", group: Infrastructure, monitor: Proxmox}
+  - {icon: pbs, name: Backup Server, url: "https://pbs.example.com", group: Infrastructure, monitor: Backup Server}
+  - {icon: beszel, name: Beszel, url: "https://beszel.example.com", group: Infrastructure, monitor: Beszel}
+  - {icon: kuma, name: Uptime Kuma, url: "https://status.example.com", group: Infrastructure}
+  - {icon: git, name: Forgejo, url: "https://git.example.com", group: Infrastructure, monitor: Forgejo}
+  - {icon: wiki, name: Wiki, url: "https://wiki.example.com", group: Infrastructure, monitor: Wiki}
+  - {icon: ha, name: Home Assistant, url: "https://home.example.com", group: Maison, monitor: Home Assistant}
+  - {icon: documents, name: Paperless-ngx, url: "https://paperless.example.com", group: Maison, monitor: Paperless-ngx}
+  - {icon: nas, name: Nextcloud, url: "https://cloud.example.com", group: Maison, monitor: Nextcloud}
+  - {icon: mail, name: Webmail, url: "https://mail.example.com", group: Maison, monitor: Webmail}
+qbittorrent:
+  - {name: Principal, url: "http://demo.invalid:8080"}
+  - {name: Seed, url: "http://demo.invalid:8081"}
+trackers: {alpha: Alpha, bravo: Bravo, charlie: Charlie, delta: Delta}

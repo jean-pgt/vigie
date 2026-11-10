@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cross-seed · __TITRE__</title>
+<meta name="theme-color" content="#0b0b0d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="__TITRE__">
+<link rel="icon" href="/s/icone.svg">
+<link rel="apple-touch-icon" href="/s/icone-180.png">
+<link rel="manifest" href="/s/manifest.webmanifest">
+<link rel="stylesheet" href="/s/theme.css">
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; color: #fff; font: 14px/1.45 var(--font); -webkit-font-smoothing: antialiased; }
+.tete { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px; margin: 6px 4px 18px; }
+.tete h1 { margin: 0; font-size: clamp(26px, 4vw, 34px); font-weight: 650; letter-spacing: -.03em; }
+.tete p { margin: 2px 0 0; color: rgba(255,255,255,.75); }
+.etat { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); }
+.etat i { width: 8px; height: 8px; border-radius: 50%; background: var(--off); }
+.etat i.ok { background: var(--on); box-shadow: 0 0 0 4px rgba(167,243,208,.15); animation: pouls 2s infinite; }
+.etat i.ko { background: var(--ko); }
+@keyframes pouls { 50% { box-shadow: 0 0 0 7px rgba(167,243,208,0); } }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.kpis .carte { padding: 16px 18px; }
+.kpis .lbl { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.kpis .v { font-size: 28px; font-weight: 650; letter-spacing: -.03em; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.kpis .v small { font-size: 13px; color: var(--muted); font-weight: 500; margin-left: 4px; }
+.kpis .d { font-size: 12px; color: var(--muted); margin-top: 2px; }
+section { margin-bottom: 18px; }
+section .carte { padding: 16px 18px; }
+section h2 { margin: 0 4px 10px; font-size: 16px; font-weight: 600; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+section h2 span { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+.graphe svg { width: 100%; height: 180px; display: block; }
+.legende { display: flex; gap: 16px; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+.legende i { display: inline-block; width: 10px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+td { padding: 8px; border-bottom: 1px solid var(--line); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 420px; }
+tr:last-child td { border-bottom: 0; }
+td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.puce-t { display: inline-block; padding: 2px 9px; border-radius: 999px; background: rgba(255,255,255,.1); font-size: 12px; font-weight: 600; }
+.vide { padding: 18px; text-align: center; color: var(--muted); font-size: 13px; }
+.defile { overflow-x: auto; }
+.deux { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.deux > section { min-width: 0; }
+.graphe { position: relative; }
+.graphe .max { position: absolute; left: 22px; top: 14px; font-size: 11px; color: var(--muted); font-family: var(--mono); }
+@media (max-width: 900px) { .deux { grid-template-columns: 1fr; } td { max-width: 200px; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <div id="barre" data-menu="crossseed"></div>
+  <script src="/s/barre.js"></script>
+  <div class="tete">
+    <div><h1>Cross-seed</h1><p>Seed en direct : qBittorrent de seed (cross-seed) et qBittorrent principal</p></div>
+    <div class="etat"><i id="pastille"></i><span id="etat">connexion…</span></div>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <section><h2>Débit d'envoi <span>10 dernières minutes, mis à jour toutes les 3 s</span></h2>
+    <div class="carte graphe"><span class="max" id="max"></span><svg id="graphe" viewBox="0 0 600 180" preserveAspectRatio="none"></svg>
+      <div class="legende"><span><i style="background:#fff"></i>Seed (cross-seed)</span><span><i style="background:#c7d2fe"></i>Principal</span></div></div></section>
+  <section><h2>Par tracker <span>qBittorrent de seed</span></h2><div class="carte defile" id="trackers"></div></section>
+  <div class="deux">
+    <section><h2>Envoient en ce moment <span id="n-actifs"></span></h2><div class="carte defile" id="actifs"></div></section>
+    <section><h2>Derniers ajouts <span>injectés par cross-seed</span></h2><div class="carte defile" id="recents"></div></section>
+  </div>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const e = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const octets = (n) => { n = n || 0; const u = ["o", "Ko", "Mo", "Go", "To", "Po"]; let i = 0; while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+  return `${n.toLocaleString("fr-FR", { maximumFractionDigits: n < 10 && i ? 1 : 0 })} ${u[i]}`; };
+const debit = (n) => `${octets(n)}/s`;
+const ilya = (t) => { const s = Math.max(0, Date.now() / 1000 - t); if (s < 3600) return `il y a ${Math.round(s / 60)} min`;
+  if (s < 86400) return `il y a ${Math.round(s / 3600)} h`; return `il y a ${Math.round(s / 86400)} j`; };
+const histo = { seed: [], principal: [] };
+const kpi = (l, v, d) => `<div class="carte"><div class="lbl">${l}</div><div class="v">${v}</div><div class="d">${d || ""}</div></div>`;
+const table = (cols, lignes, droite) => lignes.length ? `<table><thead><tr>${cols.map((c, i) => `<th class="${droite.includes(i) ? "n" : ""}">${c}</th>`).join("")}</tr></thead>
+  <tbody>${lignes.map((l) => `<tr>${l.map((c, i) => `<td class="${droite.includes(i) ? "n" : ""}" title="${e(typeof c === "string" ? c.replace(/<[^>]+>/g, "") : c)}">${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`
+  : `<div class="vide">Rien pour le moment.</div>`;
+
+function dessiner() {
+  const pts = [...histo.seed, ...histo.principal]; const max = Math.max(1, ...pts.map((p) => p[1])) * 1.15;
+  const t1 = Date.now() / 1000, t0 = t1 - 600;
+  const ligne = (s) => s.map((p) => `${((p[0] - t0) / 600 * 600).toFixed(1)},${(180 - p[1] / max * 170).toFixed(1)}`).join(" ");
+  const aire = (s) => s.length ? `M${((s[0][0] - t0) / 600 * 600).toFixed(1)},180 L${ligne(s).replace(/ /g, " L")} L${((s.at(-1)[0] - t0) / 600 * 600).toFixed(1)},180 Z` : "";
+  $("max").textContent = debit(max / 1.15);
+  $("graphe").innerHTML = `<defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+    <line x1="0" x2="600" y1="10" y2="10" stroke="rgba(255,255,255,.08)" vector-effect="non-scaling-stroke"/>
+    <path d="${aire(histo.seed)}" fill="url(#g)"/>
+    <polyline points="${ligne(histo.principal)}" fill="none" stroke="#c7d2fe" stroke-width="1.6" vector-effect="non-scaling-stroke"/>
+    <polyline points="${ligne(histo.seed)}" fill="none" stroke="#fff" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+}
+
+async function charger() {
+  try {
+    const r = await fetch("/api/crossseed", { cache: "no-store" }); const d = await r.json();
+    const s = d.clients.seed || {}, p = d.clients.principal || {};
+    const t = d.maintenant;
+    for (const [k, c] of [["seed", s], ["principal", p]]) { if (!c.erreur) histo[k].push([t, c.envoi]); histo[k] = histo[k].filter((x) => x[0] > t - 600); }
+    $("pastille").className = s.erreur ? "ko" : "ok";
+    $("etat").textContent = s.erreur ? "qBittorrent de seed injoignable" : `en direct · dernière injection ${d.derniere_injection ? ilya(d.derniere_injection) : "—"}`;
+    $("kpis").innerHTML = s.erreur ? kpi("Seed", "—", e(s.erreur)) :
+      kpi("Envoi en direct", debit(s.envoi), `${s.pairs} pairs connectés`) +
+      kpi("Envoyé au total", octets(s.envoye_total), `dont ${octets(s.envoye_session)} depuis le démarrage`) +
+      kpi("Ratio global", (s.ratio ?? "—").toString().replace(".", ","), `${octets(s.recu_total)} reçus au total`) +
+      kpi("Torrents en seed", s.torrents.toLocaleString("fr-FR"), s.erreurs ? `${s.erreurs} en erreur` : "aucune erreur") +
+      (p.erreur ? "" : kpi("Principal", debit(p.envoi), `${p.torrents} torrents · ↓ ${debit(p.reception)}`));
+    $("trackers").innerHTML = s.erreur ? "" : table(["Tracker", "Torrents", "Taille", "Envoyé", "Débit", "Actifs"],
+      s.trackers.map((x) => [`<span class="puce-t">${e(x.tracker)}</span>`, x.torrents, octets(x.taille), octets(x.envoye), debit(x.debit), x.actifs]), [1, 2, 3, 4, 5]);
+    const actifs = [...(s.actifs || []).map((x) => ["seed", x]), ...(p.actifs || []).map((x) => ["principal", x])].sort((a, b) => b[1].envoi - a[1].envoi).slice(0, 15);
+    $("n-actifs").textContent = `${actifs.length} torrent${actifs.length > 1 ? "s" : ""}`;
+    $("actifs").innerHTML = table(["Torrent", "Tracker", "Client", "Envoi", "Ratio"],
+      actifs.map(([c, x]) => [e(x.nom), `<span class="puce-t">${e(x.tracker)}</span>`, c, debit(x.envoi), x.ratio.toString().replace(".", ",")]), [3, 4]);
+    $("recents").innerHTML = s.erreur ? "" : table(["Torrent", "Tracker", "Ajouté", "Envoyé"],
+      (s.recents || []).slice(0, 15).map((x) => [e(x.nom), `<span class="puce-t">${e(x.tracker)}</span>`, ilya(x.ajout), octets(x.envoye)]), [2, 3]);
+    dessiner();
+  } catch (x) { $("pastille").className = "ko"; $("etat").textContent = "Impossible de joindre le tableau de bord."; }
+}
+charger(); setInterval(charger, 3000);
+</script>
+</body>
+</html>

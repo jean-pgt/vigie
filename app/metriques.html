@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer"><!-- certains services (OPNsense) refusent les visites venant d'un autre site -->
+<title>Métriques · __TITRE__</title>
+<meta name="theme-color" content="#0b0b0d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="__TITRE__">
+<link rel="icon" href="/s/icone.svg">
+<link rel="apple-touch-icon" href="/s/icone-180.png">
+<link rel="manifest" href="/s/manifest.webmanifest">
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; color: #fff; font: 14px/1.45 "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+.page { max-width: 1440px; margin: 0 auto; }
+[hidden] { display: none !important; }
+a { color: inherit; }
+.lbl { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.outils-m { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.onglets-m { display: flex; gap: 2px; padding: 4px; border-radius: 18px; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+.onglets-m::-webkit-scrollbar { display: none; }
+.onglets-m button { appearance: none; border: 0; background: none; color: rgba(255,255,255,.72); font: inherit; font-size: 13.5px; font-weight: 500;
+  padding: 8px 13px; border-radius: 14px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 7px; }
+.onglets-m button:hover { color: #fff; background: rgba(255,255,255,.07); }
+.onglets-m button[aria-selected="true"] { background: rgba(255,255,255,.2); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.28); }
+.onglets-m i { width: 7px; height: 7px; border-radius: 50%; background: var(--off); flex: none; }
+.onglets-m i.ok { background: var(--on); } .onglets-m i.attention { background: var(--new); } .onglets-m i.neutre { background: rgba(255,255,255,.3); }
+.periode-m { display: flex; gap: 2px; padding: 4px; border-radius: 999px; }
+.periode-m button { appearance: none; border: 0; background: none; color: var(--muted); font: inherit; font-size: 12.5px; font-weight: 600; padding: 6px 13px; border-radius: 999px; cursor: pointer; }
+.periode-m button.actif { background: #fff; color: #111; }
+.tete-m { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px; margin: 6px 4px 18px; }
+.tete-m h1 { margin: 0; font-size: clamp(26px, 4vw, 34px); font-weight: 650; letter-spacing: -.03em; text-shadow: 0 2px 20px rgba(0,0,0,.3); }
+.tete-m p { margin: 2px 0 0; color: rgba(255,255,255,.75); }
+.tete-m small { color: var(--muted); font-size: 12.5px; }
+section.s { margin-bottom: 22px; }
+section.s > .t { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; margin: 0 4px 10px; }
+section.s > .t h2 { margin: 0; font-size: 16px; font-weight: 600; text-shadow: 0 1px 12px rgba(0,0,0,.4); }
+section.s > .t span { font-size: 12.5px; color: var(--muted); }
+.kpi-m { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.kpi-m .c { padding: 16px 18px; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.kpi-m .c span { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-m .c b { font-size: 22px; font-weight: 650; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi-m .c.attention b { color: var(--new); } .kpi-m .c.ok b { color: var(--on); } .kpi-m .c.neutre b { color: rgba(255,255,255,.6); }
+.tab-m { overflow-x: auto; padding: 4px 0; }
+.tab-m table { width: 100%; border-collapse: collapse; }
+.tab-m th { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); font-weight: 600; text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; cursor: pointer; user-select: none; }
+.tab-m th:hover { color: #fff; }
+.tab-m th.d, .tab-m td.d { text-align: right; }
+.tab-m td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.07); white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 13px; }
+.tab-m td.d { font-family: var(--mono); font-size: 12.5px; color: rgba(255,255,255,.88); }
+.tab-m tr:last-child td { border-bottom: 0; }
+.tab-m tbody tr { transition: background .15s; }
+.tab-m tbody tr:hover { background: rgba(255,255,255,.06); }
+.niv { display: inline-flex; align-items: center; gap: 7px; } .niv i { width: 7px; height: 7px; border-radius: 50%; }
+.niv.critique i { background: var(--ko); } .niv.attention i { background: var(--new); } .niv.info i { background: rgba(255,255,255,.5); }
+.vide-t { padding: 22px; text-align: center; color: var(--muted); font-size: 13px; }
+.barres-m { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.barres-m .c { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.barres-m .c > b { font-size: 13.5px; font-weight: 600; }
+.barres-m .l { display: flex; flex-direction: column; gap: 5px; }
+.barres-m .l div:first-child { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; }
+.barres-m .l div:first-child span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.barres-m .l div:first-child span:last-child { color: var(--muted); font-family: var(--mono); flex: none; }
+.barres-m .piste { height: 4px; border-radius: 2px; background: rgba(255,255,255,.1); overflow: hidden; }
+.barres-m .piste i { display: block; height: 100%; border-radius: 2px; background: rgba(255,255,255,.8); transition: width .8s var(--ease); }
+.courbes-m { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; }
+.courbe { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.courbe .h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.courbe .h b { font-size: 13.5px; font-weight: 600; }
+.courbe .h span { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.courbe .zone { position: relative; height: 150px; }
+.courbe svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.courbe .axe { fill: var(--faint); font-size: 10.5px; }
+.courbe .leg { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+.courbe .leg i { display: inline-block; width: 10px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: 3px; }
+.courbe .info { position: absolute; top: 0; pointer-events: none; padding: 7px 10px; border-radius: 10px; font-size: 12px; white-space: nowrap;
+  background: var(--verre-fort); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid var(--line-strong); opacity: 0; transition: opacity .12s; z-index: 2; }
+.courbe .info.vu { opacity: 1; }
+.courbe .info b { display: block; margin-bottom: 3px; font-weight: 600; }
+.courbe .info i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.brancher { padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; border-style: dashed !important; background: rgba(22,24,30,.25) !important; }
+.brancher svg { flex: none; margin-top: 2px; opacity: .7; }
+.brancher b { display: block; font-weight: 600; margin-bottom: 2px; }
+.brancher p { margin: 0; color: var(--muted); font-size: 13px; }
+@media (max-width: 760px) {
+  .courbes-m { grid-template-columns: 1fr; }
+  .kpi-m { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .kpi-m .c { padding: 12px 14px; } .kpi-m .c b { font-size: 18px; }
+  .periode-m { margin-left: auto; }
+}
+</style>
+<link rel="stylesheet" href="/s/theme.css">
+</head>
+<body>
+<div class="page">
+  <div id="barre" data-menu="metriques"></div>
+  <script src="/s/barre.js"></script>
+  <div class="outils-m">
+    <nav class="onglets-m verre" id="onglets" role="tablist" aria-label="Sources"></nav>
+    <div class="periode-m verre" id="periode"><button data-p="1j" class="actif">24 h</button><button data-p="1s">7 j</button></div>
+  </div>
+  <div class="tete-m"><div><h1 id="titre">Métriques</h1><p id="source">Chargement…</p></div><small id="maj"></small></div>
+  <div id="contenu"></div>
+</div>
+<script>
+const A = window.vigie, $ = (id) => document.getElementById(id), e = A.echapper;
+const COULEURS = ["#c7d2fe", "#f5d0c5", "#a7f3d0", "#fde68a", "#e9d5ff", "#99f6e4", "#fecdd3"];
+const ORDRE = ["global", "opnsense", "switch", "wifi", "dns", "cloudflare", "zoraxy", "beszel", "kuma", "proxmox", "stockage", "securite", "applis"];
+let donnees = null, onglet = (location.hash || "#global").slice(1), periode = "1j", tri = {};
+try { periode = localStorage.getItem("vigie-periode-m") || "1j"; } catch (x) {}
+
+// une cellule : texte, nombre, ou [genre, valeur] (o = octets, b = bits/s, d = date, s = durée) ou liste de cellules
+function cellule(v) {
+  if (Array.isArray(v) && Array.isArray(v[0])) return v.map(cellule).join(" / ");
+  if (Array.isArray(v)) { const [g, x] = v; return g === "o" ? A.octets(x) : g === "b" ? A.bits(x) : g === "d" ? A.date(x) : g === "s" ? A.duree(x) : e(x); }
+  if (typeof v === "number") return A.nb(v, Number.isInteger(v) ? 0 : 1);
+  return e(v);
+}
+const valeurTri = (v) => Array.isArray(v) ? (Array.isArray(v[0]) ? v[0][1] : v[1]) ?? -Infinity : typeof v === "number" ? v : parseFloat(String(v).replace(",", ".").replace(/\s/g, "")) || String(v ?? "");
+
+function kpi(s) {
+  return `<div class="kpi-m">${s.items.map((i) => `<div class="c verre apparait ${i.c || ""}"><span>${e(i.l)}</span><b>${cellule(i.v ?? "—")}</b><span>${cellule(i.d || "")}</span></div>`).join("")}</div>`;
+}
+function table(s, n) {
+  const t = tri[n];
+  let lignes = s.lignes.slice();
+  if (t) lignes.sort((a, b) => { const x = valeurTri(a[t.c]), y = valeurTri(b[t.c]); return (x > y ? 1 : x < y ? -1 : 0) * (t.inv ? -1 : 1); });
+  const d = (i) => s.droite.includes(i) ? "d" : "";
+  const niv = s.cols[0] === "Gravité";
+  if (!lignes.length) return `<div class="tab-m verre apparait"><div class="vide-t">Rien pour le moment.</div></div>`;
+  return `<div class="tab-m verre apparait"><table><thead><tr>${s.cols.map((c, i) => `<th class="${d(i)}" data-t="${n}" data-c="${i}">${e(c)}${t && t.c === i ? (t.inv ? " ↑" : " ↓") : ""}</th>`).join("")}</tr></thead>
+    <tbody>${lignes.map((l) => `<tr>${l.map((c, i) => `<td class="${d(i)}">${niv && i === 0 ? `<span class="niv ${e(c)}"><i></i>${e(c)}</span>` : cellule(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function barres(s) {
+  return `<div class="barres-m">${s.listes.map((l) => { const m = Math.max(1, ...l.l.map((x) => +x[1] || 0));
+    return `<div class="c verre apparait"><b>${e(l.t)}</b>${l.l.length ? l.l.map(([k, v]) => `<div class="l"><div><span>${e(k)}</span><span>${A.nb(v, Number.isInteger(+v) ? 0 : 1)}</span></div><div class="piste"><i style="width:${100 * (+v || 0) / m}%"></i></div></div>`).join("")
+      : `<span class="lbl" style="text-transform:none;letter-spacing:0;font-weight:400">Rien sur la période</span>`}</div>`; }).join("")}</div>`;
+}
+function fmtCourbe(u, v) { return v == null ? "—" : u === "b/s" ? A.bits(v) : u === "%" ? A.nb(v, 1) + " %" : u === "ms" ? A.nb(v, 1) + " ms" : u === "°C" ? A.nb(v, 0) + " °C" : A.nb(v, 0); }
+function courbe(c, id) {
+  const pts = c.s.flatMap((s) => s.p.filter((p) => p[1] != null));
+  if (!pts.length) return `<div class="courbe verre apparait"><div class="h"><b>${e(c.t)}</b></div><div class="vide-t">Pas encore de mesures sur la période.</div></div>`;
+  const W = 600, H = 150, x0 = Math.min(...pts.map((p) => p[0])), x1 = Math.max(...pts.map((p) => p[0])), ym = Math.max(...pts.map((p) => p[1])) * 1.1 || 1;
+  const X = (x) => ((x - x0) / ((x1 - x0) || 1)) * W, Y = (y) => H - 18 - (y / ym) * (H - 26);
+  const lignes = c.s.map((s, i) => { const p = s.p.filter((q) => q[1] != null); if (!p.length) return "";
+    const d = p.map((q, j) => `${j ? "L" : "M"}${X(q[0]).toFixed(1)},${Y(q[1]).toFixed(1)}`).join("");
+    return `<path d="${d}" fill="none" stroke="${COULEURS[i % COULEURS.length]}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
+      (i === 0 ? `<path d="${d}L${X(p[p.length - 1][0]).toFixed(1)},${H - 18}L${X(p[0][0]).toFixed(1)},${H - 18}Z" fill="${COULEURS[0]}" opacity=".08"/>` : ""); }).join("");
+  const h = (t) => new Date(t * 1000).toLocaleString("fr-FR", periode === "1s" ? { weekday: "short", day: "numeric" } : { hour: "2-digit", minute: "2-digit" });
+  return `<div class="courbe verre apparait lueur" data-c="${id}"><div class="h"><b>${e(c.t)}</b><span>max ${fmtCourbe(c.u, ym / 1.1)}</span></div>
+    <div class="zone"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${e(c.t)}">
+      <line x1="0" y1="${H - 18}" x2="${W}" y2="${H - 18}" stroke="rgba(255,255,255,.12)" vector-effect="non-scaling-stroke"/>
+      <line x1="0" y1="${Y(ym / 2.2)}" x2="${W}" y2="${Y(ym / 2.2)}" stroke="rgba(255,255,255,.06)" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"/>
+      ${lignes}<line class="curseur" x1="0" x2="0" y1="0" y2="${H - 18}" stroke="rgba(255,255,255,.4)" vector-effect="non-scaling-stroke" opacity="0"/></svg>
+      <div class="info"></div></div>
+    <div class="leg"><span>${h(x0)}</span>${c.s.map((s, i) => `<span><i style="background:${COULEURS[i % COULEURS.length]}"></i>${e(s.n)}</span>`).join("")}<span style="margin-left:auto">${h(x1)}</span></div></div>`;
+}
+let COURBES = [];
+function courbes(s) { return `<div class="courbes-m">${s.courbes.map((c) => { COURBES.push(c); return courbe(c, COURBES.length - 1); }).join("")}</div>`; }
+function brancher(s) {
+  return `<div class="brancher verre apparait"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0z M12 16v5"/></svg>
+    <div><b>${e(s.titre)} · à brancher</b><p>${e(s.texte)}</p></div></div>`;
+}
+
+function rendre() {
+  const d = donnees;
+  if (!d.onglets[onglet]) onglet = "global";
+  const sante = Object.fromEntries((d.onglets.global.sections[0].items || []).map((i) => [i.l.toLowerCase(), i.c]));
+  const cleSante = { opnsense: "opnsense", switch: "switch", wifi: "wi-fi", dns: "dns", cloudflare: "cloudflare", zoraxy: "zoraxy", beszel: "beszel", kuma: "uptime kuma", proxmox: "proxmox", stockage: "sauvegardes" };
+  $("onglets").innerHTML = ORDRE.filter((k) => d.onglets[k]).map((k) => `<button role="tab" aria-selected="${k === onglet}" data-o="${k}">${sante[cleSante[k]] ? `<i class="${sante[cleSante[k]]}"></i>` : ""}${e(d.onglets[k].nom)}${k === "global" && d.n_alertes ? ` <b style="font-size:11px;padding:0 6px;border-radius:999px;background:rgba(253,230,138,.22);color:#fde68a">${d.n_alertes}</b>` : ""}</button>`).join("");
+  const o = d.onglets[onglet];
+  $("titre").textContent = o.nom; $("source").textContent = o.source;
+  $("maj").textContent = "Mis à jour " + A.il_y_a(d.maintenant);
+  COURBES = [];
+  $("contenu").innerHTML = o.sections.map((s, n) => `<section class="s">${s.titre && s.type !== "brancher" ? `<div class="t"><h2>${e(s.titre)}</h2><span>${e(s.note || "")}</span></div>` : ""}
+    ${s.type === "kpi" ? kpi(s) : s.type === "table" ? table(s, `${onglet}-${n}`) : s.type === "barres" ? barres(s) : s.type === "courbes" ? courbes(s) : brancher(s)}</section>`).join("");
+  document.querySelectorAll(".periode-m button").forEach((b) => b.classList.toggle("actif", b.dataset.p === periode));
+  const actif = $("onglets").querySelector('[aria-selected="true"]'); if (actif) actif.scrollIntoView({ block: "nearest", inline: "nearest" });
+  document.title = `${o.nom} · Métriques · ${window.VIGIE ? VIGIE.titre : ""}`;
+  A.alertes(d.n_alertes);
+  A.apparition(document);
+}
+
+async function charger() {
+  try {
+    const r = await fetch(`/api/metriques?p=${periode}`, { cache: "no-store" });
+    if (r.ok) { donnees = await r.json(); rendre(); }
+  } catch (x) { $("source").textContent = "Impossible de joindre le tableau de bord."; }
+}
+$("onglets").onclick = (ev) => { const b = ev.target.closest("button"); if (!b) return; onglet = b.dataset.o; history.replaceState(null, "", "#" + onglet); document.body.dataset.vu = ""; rendre(); };
+$("periode").onclick = (ev) => { const b = ev.target.closest("button"); if (!b) return; periode = b.dataset.p; try { localStorage.setItem("vigie-periode-m", periode); } catch (x) {} charger(); };
+$("contenu").onclick = (ev) => { const th = ev.target.closest("th"); if (!th) return; const n = th.dataset.t, c = +th.dataset.c; tri[n] = tri[n] && tri[n].c === c ? { c, inv: !tri[n].inv } : { c, inv: true }; rendre(); };
+window.addEventListener("hashchange", () => { onglet = location.hash.slice(1) || "global"; if (donnees) rendre(); });
+// survol des courbes : ligne verticale et valeurs au point le plus proche
+$("contenu").addEventListener("pointermove", (ev) => {
+  const z = ev.target.closest(".zone"); if (!z) return;
+  const carte = z.closest(".courbe"), c = COURBES[+carte.dataset.c], r = z.getBoundingClientRect(), f = (ev.clientX - r.left) / r.width;
+  const pts = c.s.flatMap((s) => s.p); const x0 = Math.min(...pts.map((p) => p[0])), x1 = Math.max(...pts.map((p) => p[0])), t = x0 + f * (x1 - x0);
+  const proche = (s) => s.p.reduce((m, p) => Math.abs(p[0] - t) < Math.abs(m[0] - t) ? p : m, s.p[0] || [0, null]);
+  const info = z.querySelector(".info"), cur = z.querySelector(".curseur");
+  cur.setAttribute("x1", f * 600); cur.setAttribute("x2", f * 600); cur.setAttribute("opacity", 1);
+  info.innerHTML = `<b>${new Date(t * 1000).toLocaleString("fr-FR", { weekday: "short", hour: "2-digit", minute: "2-digit" })}</b>` +
+    c.s.map((s, i) => `<div><i style="background:${COULEURS[i % COULEURS.length]}"></i>${e(s.n)} : ${fmtCourbe(c.u, proche(s)[1])}</div>`).join("");
+  info.classList.add("vu"); info.style.left = Math.min(Math.max(ev.clientX - r.left + 12, 0), r.width - info.offsetWidth) + "px";
+});
+$("contenu").addEventListener("pointerleave", () => document.querySelectorAll(".courbe .info").forEach((i) => i.classList.remove("vu")), true);
+$("contenu").addEventListener("pointerout", (ev) => { const z = ev.target.closest(".zone"); if (z && !z.contains(ev.relatedTarget)) { z.querySelector(".info").classList.remove("vu"); z.querySelector(".curseur").setAttribute("opacity", 0); } });
+charger(); setInterval(charger, 60000);
+</script>
+</body>
+</html>
